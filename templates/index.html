@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mise — Recipes for every plate</title>
+<meta name="description" content="A recipe box that knows your allergies: flags ingredients, suggests safe swaps, and guides you through cooking.">
+<meta name="theme-color" content="#f6f5f0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23c8e35c'/%3E%3Ctext x='16' y='23' font-size='20' font-family='Arial' font-weight='700' text-anchor='middle' fill='%231d2b18'%3EM%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css?v={{ v }}">
+</head>
+<body>
+<div id="app" class="app" data-pane="cats">
+  <aside id="side" class="pane"></aside>
+  <section id="list" class="pane"></section>
+  <main id="detail" class="pane"></main>
+</div>
+<div id="modal"></div>
+<div id="cook"></div>
+<div id="timers"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>window.__SEED__ = {{ seed|tojson }};</script>
+<script src="/static/app.js?v={{ v }}"></script>
+</body>
+</html>
