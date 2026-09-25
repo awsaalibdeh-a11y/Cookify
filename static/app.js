@@ -5,8 +5,8 @@
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const store = {
-  get(k, d) { try { const v = localStorage.getItem('mise.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('mise.' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
+  get(k, d) { try { const v = localStorage.getItem('cookify.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('cookify.' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
 };
 const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>',
@@ -241,7 +241,7 @@ function renderSide() {
     `<button class="tile ${cls} ${S.ui.cat === id ? 'on' : ''}" style="--h:${h}" data-act="cat" data-id="${id}"><span class="em">${emoji}</span>${count != null ? `<span class="ct">${count}</span>` : ''}<span class="lb">${esc(name)}</span></button>`;
   const safeCount = profileActive() ? recipes.filter(r => statusOf(r) !== 'unsafe').length : recipes.length;
   root.side.innerHTML = `
-    <div class="brand"><div class="logo">M</div><b>Mise</b>
+    <div class="brand"><div class="logo">C</div><b>Cookify</b>
       <button class="ibtn" data-act="profile" title="Allergy & diet profile" aria-label="Allergy and diet profile">${ic('shield')}${n ? `<span class="dot">${n}</span>` : ''}</button>
       <button class="ibtn" data-act="shop" title="Shopping list" aria-label="Shopping list">${ic('cart')}${S.list.filter(i => !i.done).length ? `<span class="dot" style="background:var(--accent-strong)">${S.list.filter(i => !i.done).length}</span>` : ''}</button>
       <button class="ibtn" data-act="planner" title="Meal planner" aria-label="Meal planner">${ic('cal')}</button>
@@ -325,7 +325,7 @@ function renderDetail() {
   const bad = items.filter(it => it.hits.length);
   const isFav = S.fav.includes(r.id);
   let safeHtml = '';
-  if (!active) safeHtml = `<div class="safebox none">${ic('shield')}<div>Tell Mise about your allergies and diet to check this recipe. <button data-act="profile">Set up profile</button></div></div>`;
+  if (!active) safeHtml = `<div class="safebox none">${ic('shield')}<div>Tell Cookify about your allergies and diet to check this recipe. <button data-act="profile">Set up profile</button></div></div>`;
   else if (status === 'safe') safeHtml = `<div class="safebox safe">${ic('check')}<div><b>Safe for your profile.</b> No ingredients match your allergens or diet.</div></div>`;
   else if (status === 'swap') safeHtml = `<div class="safebox swap">${ic('swap')}<div><b>Needs ${bad.length} swap${bad.length > 1 ? 's' : ''}.</b> Ingredients highlighted below conflict with your profile, and each has a safe substitute.</div></div>`;
   else safeHtml = `<div class="safebox unsafe">${ic('alert')}<div><b>Not safe as written.</b> ${bad.some(b => !b.subs.length) ? 'At least one ingredient has no safe substitute we can suggest.' : ''} Look for a different recipe or adapt it carefully.</div></div>`;
@@ -391,7 +391,7 @@ const sheet = (title, body, foot = '', wide = false) => `<div class="sheet ${wid
 
 function profileModal() {
   const p = P(), first = !S.profile;
-  return sheet(first ? 'Welcome to Mise' : 'Allergies & diet', `
+  return sheet(first ? 'Welcome to Cookify' : 'Allergies & diet', `
     <p class="help">${first ? 'Tell me what to avoid and I will check every ingredient, warn you, and suggest safe swaps. ' : ''}Everything stays on this device.</p>
     <h3 class="sec" style="margin-top:6px">I'm allergic to</h3>
     <div class="agrid">${ALLERGEN_IDS.map(id => `<button class="abtn" data-act="tgl-allergen" data-id="${id}" aria-pressed="${p.allergens.includes(id)}"><span>${A[id].icon}</span>${A[id].label}</button>`).join('')}</div>
@@ -402,7 +402,7 @@ function profileModal() {
     <div class="avoidtags">${p.avoid.map((w, i) => `<span class="tag hit">${esc(w)} <button data-act="rmavoid" data-i="${i}" aria-label="Remove ${esc(w)}">${ic('x')}</button></span>`).join('')}</div>
     <div class="switchrow"><div><b>Hide unsafe recipes</b><div style="color:var(--muted);font-size:13px">Recipes with an unfixable conflict disappear from lists.</div></div>
       <button class="abtn diet" style="min-width:74px;justify-content:center" data-act="hideunsafe" aria-pressed="${p.hideUnsafe}">${p.hideUnsafe ? 'On' : 'Off'}</button></div>
-    <p class="help" style="margin-top:14px">Mise reads ingredient names and can't see hidden ingredients in packaged foods or cross-contact in kitchens. For serious allergies always read labels and follow your doctor's advice.</p>`,
+    <p class="help" style="margin-top:14px">Cookify reads ingredient names and can't see hidden ingredients in packaged foods or cross-contact in kitchens. For serious allergies always read labels and follow your doctor's advice.</p>`,
     `<button class="gbtn" data-act="close">${first ? 'Start cooking' : 'Done'}</button>`);
 }
 
@@ -547,7 +547,7 @@ const ACT = {
   print() { window.print(); },
   async share() {
     const r = byId(S.ui.sel), url = location.href.split('#')[0] + '#r=' + encodeURIComponent(r.id);
-    try { if (navigator.share) { await navigator.share({ title: r.title, text: `${r.title} on Mise`, url }); return; } await navigator.clipboard.writeText(url); toast('Link copied'); } catch { /* cancelled */ }
+    try { if (navigator.share) { await navigator.share({ title: r.title, text: `${r.title} on Cookify`, url }); return; } await navigator.clipboard.writeText(url); toast('Link copied'); } catch { /* cancelled */ }
   },
   async copy() {
     const r = byId(S.ui.sel), serves = S.servings[r.id] || r.serves || 4, f = serves / (r.serves || serves);

@@ -1,4 +1,4 @@
-"""Mise — a recipe box that understands allergies.
+"""Cookify — a recipe box that understands allergies.
 
 Recipes, profile, shopping list and plan all live in the browser. The server hands over the
 page and offers one endpoint, /api/import, which reads a recipe from any public recipe URL.
@@ -36,7 +36,7 @@ def healthz():
     return {"ok": True}
 
 
-UA = {"User-Agent": "Mozilla/5.0 (compatible; MiseRecipeImporter/1.0)", "Accept": "text/html,*/*"}
+UA = {"User-Agent": "Mozilla/5.0 (compatible; CookifyRecipeImporter/1.0)", "Accept": "text/html,*/*"}
 
 
 def _is_public(host):
