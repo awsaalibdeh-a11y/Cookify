@@ -217,3 +217,19 @@ textarea.notes{width:100%;min-height:80px;border:1px solid var(--line);border-ra
   .app{display:block;height:auto}.pane{overflow:visible;display:block!important}#detail{display:block!important}
   .hero{height:120px}
 }
+
+/* AI search */
+.searchform{display:flex;gap:8px;align-items:stretch}
+.searchform .search{flex:1}
+.searchform .gbtn{padding:0 16px}
+.clamp1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.intro{margin:10px 2px 0;color:var(--muted);font-size:13.5px}
+.obtn.wide{width:100%;justify-content:center;margin-top:14px;padding:10px}
+.badge.pending{background:var(--surface2);color:var(--muted)}
+.row.skel .thumb{background:var(--surface2)}
+.row.skel .t b,.row.skel .t small{display:block;height:12px;border-radius:6px;background:var(--surface2);margin:6px 0;animation:sk 1s infinite alternate}
+.row.skel .t small{width:60%}
+@keyframes sk{to{opacity:.4}}
+.writing{display:flex;align-items:center;gap:10px;margin-top:22px;padding:14px;border-radius:14px;background:var(--surface2);color:var(--muted)}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--accent-strong);animation:rot .8s linear infinite;flex:none}
+@keyframes rot{to{transform:rotate(360deg)}}

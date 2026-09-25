@@ -1,90 +1,77 @@
 {
-  "categories": [
-    {"id": "breakfast", "name": "Breakfast", "emoji": "🥞", "h": 38},
-    {"id": "appetizers", "name": "Appetizers", "emoji": "🍅", "h": 8},
-    {"id": "soup", "name": "Soup", "emoji": "🍲", "h": 28},
-    {"id": "salad", "name": "Salad", "emoji": "🥗", "h": 105},
-    {"id": "poultry", "name": "Poultry", "emoji": "🍗", "h": 22},
-    {"id": "beef", "name": "Beef", "emoji": "🥩", "h": 355},
-    {"id": "pork", "name": "Pork", "emoji": "🥓", "h": 12},
-    {"id": "seafood", "name": "Seafood", "emoji": "🍤", "h": 195},
-    {"id": "pasta", "name": "Pasta & Noodles", "emoji": "🍝", "h": 45},
-    {"id": "vegetarian", "name": "Vegetarian", "emoji": "🥦", "h": 130},
-    {"id": "sides", "name": "Sides", "emoji": "🥔", "h": 60},
-    {"id": "dessert", "name": "Dessert", "emoji": "🍰", "h": 330}
-  ],
-  "recipes": [
-    {"id": "pancakes", "title": "Fluffy Buttermilk Pancakes", "cat": "breakfast", "emoji": "🥞", "time": 25, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["2 cups all-purpose flour", "2 tbsp sugar", "2 tsp baking powder", "1/2 tsp baking soda", "1/2 tsp salt", "2 cups buttermilk", "2 large eggs", "3 tbsp butter, melted"],
-     "steps": ["Whisk the flour, sugar, baking powder, baking soda and salt in a large bowl.", "In a second bowl whisk the buttermilk, eggs and melted butter until smooth.", "Pour the wet mixture into the dry and stir just until combined. A few lumps are fine. Rest the batter for 5 minutes.", "Heat a lightly greased skillet over medium heat. Pour 1/4 cup of batter per pancake.", "Cook 2 to 3 minutes until bubbles form on top, flip and cook 1 to 2 minutes more until golden. Serve warm."]},
-    {"id": "scramble-bowl", "title": "Veggie Scramble Bowl", "cat": "breakfast", "emoji": "🍳", "time": 15, "serves": 2, "source": "Cookify kitchen",
-     "ingredients": ["4 large eggs", "1 tbsp olive oil", "1 cup baby spinach", "1/2 cup cherry tomatoes, halved", "1/4 cup feta cheese, crumbled", "1 avocado, sliced", "salt and pepper to taste"],
-     "steps": ["Beat the eggs with a pinch of salt and pepper.", "Warm the olive oil in a non-stick pan over medium heat and wilt the spinach for 1 minute.", "Add the tomatoes, then pour in the eggs. Stir gently for 2 to 3 minutes until just set.", "Spoon into bowls and top with feta and sliced avocado."]},
-    {"id": "bruschetta", "title": "Tomato Basil Bruschetta", "cat": "appetizers", "emoji": "🍅", "time": 20, "serves": 6, "source": "Cookify kitchen",
-     "ingredients": ["1 baguette, sliced into 1/2 inch rounds", "4 roma tomatoes, diced", "2 cloves garlic, minced", "1/4 cup fresh basil, chopped", "2 tbsp olive oil", "1 tbsp balsamic vinegar", "salt to taste"],
-     "steps": ["Heat the oven to 400F (200C). Arrange the baguette slices on a baking sheet and toast for 8 to 10 minutes until crisp.", "Mix the tomatoes, garlic, basil, olive oil, balsamic vinegar and salt in a bowl. Let sit 10 minutes.", "Spoon the tomato mixture onto the toasts just before serving."]},
-    {"id": "spinach-dip", "title": "Spinach Artichoke Dip", "cat": "appetizers", "emoji": "🧀", "time": 35, "serves": 8, "source": "Cookify kitchen",
-     "ingredients": ["8 oz cream cheese, softened", "1/2 cup sour cream", "1 cup frozen spinach, thawed and squeezed dry", "1 can artichoke hearts, chopped", "1/2 cup mozzarella cheese, shredded", "1/4 cup parmesan cheese, grated", "2 cloves garlic, minced", "corn tortilla chips for serving"],
-     "steps": ["Heat the oven to 375F (190C).", "Beat the cream cheese and sour cream together until smooth, then stir in the spinach, artichokes, garlic and half of each shredded cheese.", "Spread into a small baking dish and top with the remaining cheese.", "Bake 20 to 25 minutes until bubbling and golden. Serve hot with tortilla chips."]},
-    {"id": "tomato-soup", "title": "Roasted Tomato Soup", "cat": "soup", "emoji": "🍅", "time": 45, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["2 lb ripe tomatoes, halved", "1 onion, quartered", "4 cloves garlic, unpeeled", "2 tbsp olive oil", "2 cups vegetable broth", "1/2 cup heavy cream", "1 tsp salt", "fresh basil leaves"],
-     "steps": ["Heat the oven to 425F (220C). Toss the tomatoes, onion and garlic with the olive oil and salt on a sheet pan.", "Roast for 30 minutes until soft and caramelised at the edges.", "Squeeze the garlic from its skins into a pot and add the roasted vegetables and broth. Simmer 5 minutes.", "Blend until smooth, stir in the cream and warm through. Top with basil."]},
-    {"id": "chicken-noodle", "title": "Chicken Noodle Soup", "cat": "soup", "emoji": "🍜", "time": 50, "serves": 6, "source": "Cookify kitchen",
-     "ingredients": ["1 lb chicken breast", "8 cups chicken broth", "2 carrots, sliced", "2 stalks celery, sliced", "1 onion, diced", "8 oz egg noodles", "2 tbsp butter", "1 tsp dried thyme", "salt and pepper to taste"],
-     "steps": ["Melt the butter in a large pot and soften the onion, carrots and celery for 5 minutes.", "Add the broth, thyme and chicken. Bring to a boil, then simmer 20 minutes until the chicken is cooked through.", "Lift out the chicken, shred it and return it to the pot.", "Stir in the noodles and cook 7 minutes until tender. Season with salt and pepper."]},
-    {"id": "greek-chickpea", "title": "Greek Chickpea Salad", "cat": "salad", "emoji": "🥗", "time": 15, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["1 can chickpeas, drained and rinsed", "1 cucumber, diced", "1 cup cherry tomatoes, halved", "1/2 red onion, thinly sliced", "1/2 cup kalamata olives", "1/2 cup feta cheese, crumbled", "3 tbsp olive oil", "2 tbsp lemon juice", "1 tsp dried oregano"],
-     "steps": ["Whisk the olive oil, lemon juice and oregano in a large bowl.", "Add the chickpeas, cucumber, tomatoes, onion and olives and toss to coat.", "Fold in the feta and serve chilled or at room temperature."]},
-    {"id": "sesame-slaw", "title": "Asian Sesame Slaw", "cat": "salad", "emoji": "🥬", "time": 15, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["4 cups shredded cabbage", "2 carrots, shredded", "3 green onions, sliced", "1/4 cup roasted peanuts, chopped", "3 tbsp soy sauce", "2 tbsp rice vinegar", "1 tbsp toasted sesame oil", "1 tbsp honey", "1 tbsp sesame seeds"],
-     "steps": ["Whisk the soy sauce, rice vinegar, sesame oil and honey to make the dressing.", "Toss the cabbage, carrots and green onions with the dressing.", "Top with peanuts and sesame seeds. Chill 10 minutes before serving."]},
-    {"id": "shoyu-chicken", "title": "Shoyu Chicken", "cat": "poultry", "emoji": "🍗", "time": 100, "serves": 6, "source": "Cookify kitchen",
-     "ingredients": ["1 cup soy sauce", "1 cup brown sugar", "1 cup water", "1 onion, chopped", "4 cloves garlic, minced", "1 tbsp fresh ginger, grated", "3 lb bone-in chicken thighs", "2 green onions, sliced"],
-     "steps": ["Stir the soy sauce, brown sugar and water in a large pot until the sugar dissolves. Add the onion, garlic and ginger.", "Add the chicken thighs, bring to a boil, then reduce the heat, cover and simmer for 1 hour 15 minutes.", "Turn the chicken every 20 minutes so it colours evenly.", "Serve with rice and spoon some of the sauce over the top. Garnish with green onions."]},
-    {"id": "roast-chicken", "title": "Lemon Herb Roast Chicken", "cat": "poultry", "emoji": "🍋", "time": 75, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["4 lb whole chicken", "3 tbsp butter, softened", "1 lemon, sliced", "4 cloves garlic, smashed", "1 tbsp fresh thyme leaves", "1 tsp salt", "1/2 tsp black pepper", "1 onion, quartered"],
-     "steps": ["Heat the oven to 425F (220C). Pat the chicken very dry.", "Mix the butter with the thyme, salt and pepper and rub it under and over the skin.", "Stuff the cavity with the lemon and garlic and set the chicken on the onion in a roasting pan.", "Roast for 60 to 70 minutes until the thickest part of the thigh reads 165F (74C).", "Rest 15 minutes before carving."]},
-    {"id": "beef-chili", "title": "Classic Beef Chili", "cat": "beef", "emoji": "🌶️", "time": 90, "serves": 6, "source": "Cookify kitchen",
-     "ingredients": ["1.5 lb ground beef", "1 onion, diced", "3 cloves garlic, minced", "2 tbsp chili powder", "1 tsp ground cumin", "1 can crushed tomatoes", "1 can kidney beans, drained", "1 cup beef broth", "1 tsp salt"],
-     "steps": ["Brown the beef in a large pot over medium-high heat, breaking it up, about 8 minutes. Drain excess fat.", "Add the onion and cook 5 minutes, then the garlic, chili powder and cumin for 1 minute.", "Add the tomatoes, beans, broth and salt. Bring to a simmer.", "Cook uncovered on low for 1 hour, stirring now and then, until thick."]},
-    {"id": "steak-bites", "title": "Garlic Butter Steak Bites", "cat": "beef", "emoji": "🥩", "time": 20, "serves": 3, "source": "Cookify kitchen",
-     "ingredients": ["1 lb sirloin steak, cut into 1 inch cubes", "3 tbsp butter", "4 cloves garlic, minced", "1 tbsp olive oil", "1 tbsp fresh parsley, chopped", "salt and pepper to taste"],
-     "steps": ["Season the steak generously with salt and pepper.", "Heat the olive oil in a heavy skillet over high heat until smoking. Sear the steak in a single layer for 2 minutes without moving it.", "Toss and cook 2 more minutes, then add the butter and garlic and cook 1 minute.", "Sprinkle with parsley and serve immediately."]},
-    {"id": "pork-chops", "title": "Honey Garlic Pork Chops", "cat": "pork", "emoji": "🍯", "time": 30, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["4 bone-in pork chops", "1/4 cup honey", "1/4 cup soy sauce", "4 cloves garlic, minced", "1 tbsp olive oil", "1 tbsp rice vinegar", "1 tsp cornstarch"],
-     "steps": ["Whisk the honey, soy sauce, garlic, rice vinegar and cornstarch together.", "Sear the pork chops in the olive oil over medium-high heat for 4 minutes per side.", "Pour the sauce into the pan and simmer 3 to 4 minutes, spooning it over the chops, until glossy and the pork reaches 145F (63C)."]},
-    {"id": "sheet-pan-sausage", "title": "Sheet-Pan Sausage & Veggies", "cat": "pork", "emoji": "🌭", "time": 35, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["1 lb smoked sausage, sliced", "2 bell peppers, chopped", "1 zucchini, sliced", "1 red onion, cut in wedges", "2 tbsp olive oil", "1 tsp smoked paprika", "1/2 tsp salt"],
-     "steps": ["Heat the oven to 425F (220C).", "Toss everything with the olive oil, paprika and salt on a large sheet pan.", "Roast 25 minutes, stirring once, until the vegetables are charred at the edges."]},
-    {"id": "lemon-salmon", "title": "Lemon Garlic Salmon", "cat": "seafood", "emoji": "🐟", "time": 25, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["4 salmon fillets", "3 tbsp butter, melted", "3 cloves garlic, minced", "1 lemon, juiced", "1 tbsp fresh dill, chopped", "salt and pepper to taste"],
-     "steps": ["Heat the oven to 400F (200C) and line a sheet pan with parchment.", "Mix the butter, garlic and lemon juice. Place the salmon on the pan, season and spoon the butter over the top.", "Bake 12 to 15 minutes until the fish flakes easily. Finish with dill."]},
-    {"id": "garlic-shrimp", "title": "Garlic Shrimp Skillet", "cat": "seafood", "emoji": "🍤", "time": 15, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["1 lb shrimp, peeled and deveined", "2 tbsp olive oil", "4 cloves garlic, minced", "1/2 tsp red pepper flakes", "1 lemon, juiced", "2 tbsp fresh parsley, chopped", "2 cups cooked rice"],
-     "steps": ["Heat the olive oil in a large skillet over medium-high heat.", "Add the shrimp in a single layer and cook 2 minutes per side until pink.", "Add the garlic and pepper flakes for 30 seconds, then the lemon juice.", "Scatter with parsley and serve over the rice."]},
-    {"id": "aglio-olio", "title": "Spaghetti Aglio e Olio", "cat": "pasta", "emoji": "🍝", "time": 20, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["12 oz spaghetti", "1/3 cup olive oil", "6 cloves garlic, thinly sliced", "1/2 tsp red pepper flakes", "1/4 cup fresh parsley, chopped", "1/2 cup parmesan cheese, grated", "salt for the pasta water"],
-     "steps": ["Cook the spaghetti in well-salted boiling water until al dente. Save 1 cup of the pasta water, then drain.", "Meanwhile warm the olive oil over low heat and cook the garlic and pepper flakes for 3 minutes until barely golden.", "Toss in the pasta with a splash of the pasta water until glossy.", "Finish with parsley and parmesan."]},
-    {"id": "peanut-noodles", "title": "Sesame Peanut Noodles", "cat": "pasta", "emoji": "🥜", "time": 20, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["8 oz lo mein noodles", "1/3 cup peanut butter", "3 tbsp soy sauce", "1 tbsp rice vinegar", "1 tbsp honey", "1 tsp toasted sesame oil", "2 cloves garlic, minced", "1 cucumber, julienned", "2 green onions, sliced"],
-     "steps": ["Cook the noodles according to the package, then rinse under cold water and drain.", "Whisk the peanut butter, soy sauce, rice vinegar, honey, sesame oil and garlic with 3 tbsp warm water until smooth.", "Toss the noodles with the sauce, then top with cucumber and green onions."]},
-    {"id": "stuffed-peppers", "title": "Stuffed Bell Peppers", "cat": "vegetarian", "emoji": "🫑", "time": 55, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["4 bell peppers, tops removed", "1 cup cooked rice", "1 can black beans, drained", "1 cup corn kernels", "1 cup salsa", "1 cup cheddar cheese, shredded", "1 tsp ground cumin"],
-     "steps": ["Heat the oven to 375F (190C) and stand the peppers in a baking dish.", "Mix the rice, beans, corn, salsa, cumin and half of the cheese.", "Fill the peppers, cover with foil and bake 30 minutes.", "Uncover, top with the remaining cheese and bake 10 minutes more until melted."]},
-    {"id": "chickpea-curry", "title": "Coconut Chickpea Curry", "cat": "vegetarian", "emoji": "🍛", "time": 30, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["2 tbsp coconut oil", "1 onion, diced", "3 cloves garlic, minced", "1 tbsp curry powder", "2 cans chickpeas, drained", "1 can coconut milk", "1 can diced tomatoes", "2 cups baby spinach", "2 cups cooked rice"],
-     "steps": ["Melt the coconut oil in a large pan and cook the onion for 5 minutes.", "Add the garlic and curry powder and stir for 1 minute.", "Add the chickpeas, coconut milk and tomatoes. Simmer 15 minutes until thickened.", "Stir in the spinach until wilted and serve over rice."]},
-    {"id": "roast-potatoes", "title": "Crispy Roasted Potatoes", "cat": "sides", "emoji": "🥔", "time": 45, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["2 lb baby potatoes, halved", "3 tbsp olive oil", "1 tsp garlic powder", "1 tsp paprika", "1 tsp salt", "2 sprigs fresh rosemary"],
-     "steps": ["Heat the oven to 425F (220C) with a sheet pan inside.", "Toss the potatoes with the oil, garlic powder, paprika and salt.", "Tip onto the hot pan cut-side down, add the rosemary and roast 35 to 40 minutes, turning once, until crisp."]},
-    {"id": "green-beans", "title": "Garlic Green Beans with Almonds", "cat": "sides", "emoji": "🫘", "time": 15, "serves": 4, "source": "Cookify kitchen",
-     "ingredients": ["1 lb green beans, trimmed", "2 tbsp olive oil", "3 cloves garlic, sliced", "1 tbsp lemon juice", "1/4 cup sliced almonds", "1/2 tsp salt"],
-     "steps": ["Blanch the green beans in boiling salted water for 3 minutes, then drain.", "Heat the olive oil in a skillet and toast the almonds for 1 minute. Add the garlic for 30 seconds.", "Add the beans and cook 3 minutes, then finish with lemon juice and salt."]},
-    {"id": "choc-chip-cookies", "title": "Chewy Chocolate Chip Cookies", "cat": "dessert", "emoji": "🍪", "time": 30, "serves": 12, "source": "Cookify kitchen",
-     "ingredients": ["2 1/4 cups all-purpose flour", "1 tsp baking soda", "1 cup butter, softened", "3/4 cup sugar", "3/4 cup brown sugar", "2 large eggs", "2 tsp vanilla extract", "2 cups chocolate chips"],
-     "steps": ["Heat the oven to 350F (175C). Whisk the flour and baking soda.", "Beat the butter and both sugars until fluffy, then beat in the eggs and vanilla.", "Stir in the flour mixture and the chocolate chips.", "Drop rounded tablespoons onto lined trays and bake 10 to 12 minutes until the edges are golden. Cool on the tray for 5 minutes."]},
-    {"id": "banana-bread", "title": "Almond Flour Banana Bread", "cat": "dessert", "emoji": "🍌", "time": 60, "serves": 8, "source": "Cookify kitchen",
-     "ingredients": ["3 ripe bananas, mashed", "2 large eggs", "1/4 cup maple syrup", "1/4 cup coconut oil, melted", "2 cups almond flour", "1 tsp baking soda", "1 tsp ground cinnamon", "1/2 cup walnuts, chopped"],
-     "steps": ["Heat the oven to 350F (175C) and line a loaf pan with parchment.", "Whisk the bananas, eggs, maple syrup and coconut oil.", "Stir in the almond flour, baking soda and cinnamon, then fold in the walnuts.", "Pour into the pan and bake 45 to 50 minutes until a skewer comes out clean. Cool before slicing."]}
-  ]
+ "categories": [
+  {
+   "id": "breakfast",
+   "name": "Breakfast",
+   "emoji": "🥞",
+   "h": 38
+  },
+  {
+   "id": "appetizers",
+   "name": "Appetizers",
+   "emoji": "🍅",
+   "h": 8
+  },
+  {
+   "id": "soup",
+   "name": "Soup",
+   "emoji": "🍲",
+   "h": 28
+  },
+  {
+   "id": "salad",
+   "name": "Salad",
+   "emoji": "🥗",
+   "h": 105
+  },
+  {
+   "id": "poultry",
+   "name": "Poultry",
+   "emoji": "🍗",
+   "h": 22
+  },
+  {
+   "id": "beef",
+   "name": "Beef",
+   "emoji": "🥩",
+   "h": 355
+  },
+  {
+   "id": "pork",
+   "name": "Pork",
+   "emoji": "🥓",
+   "h": 12
+  },
+  {
+   "id": "seafood",
+   "name": "Seafood",
+   "emoji": "🍤",
+   "h": 195
+  },
+  {
+   "id": "pasta",
+   "name": "Pasta & Noodles",
+   "emoji": "🍝",
+   "h": 45
+  },
+  {
+   "id": "vegetarian",
+   "name": "Vegetarian",
+   "emoji": "🥦",
+   "h": 130
+  },
+  {
+   "id": "sides",
+   "name": "Sides",
+   "emoji": "🥔",
+   "h": 60
+  },
+  {
+   "id": "dessert",
+   "name": "Dessert",
+   "emoji": "🍰",
+   "h": 330
+  }
+ ],
+ "recipes": []
 }

@@ -42,16 +42,19 @@ const S = {
   profile: store.get('profile', null), fav: store.get('fav', []), list: store.get('list', []),
   plan: store.get('plan', {}), swaps: store.get('swaps', {}), notes: store.get('notes', {}),
   units: store.get('units', 'us'), servings: {}, checked: {},
-  ui: { cat: 'all', q: '', sel: null, quick: false, safeOnly: false, sort: 'title', swapOpen: null },
+  saved: store.get('saved', {}), results: store.get('results', {}), details: store.get('details', {}), cache: store.get('cache', {}),
+  search: store.get('search', { key: '', query: '', intro: '', ids: [], status: 'idle' }),
+  ui: { cat: 'search', q: store.get('search', {}).query || '', sel: null, quick: false, safeOnly: false, sort: 'relevance', swapOpen: null },
 };
 const persist = (...keys) => keys.forEach(k => store.set(k, S[k]));
 const P = () => S.profile || DEFAULT_PROFILE;
 
-const allRecipes = () => [
-  ...SEED.recipes.filter(r => !S.hidden.includes(r.id)).map(r => S.edits[r.id] || r),
-  ...S.custom,
-];
-const byId = id => allRecipes().find(r => r.id === id);
+const myRecipes = () => [...S.custom, ...Object.values(S.saved)];
+const byId = id => S.results[id] || S.saved[id] || S.custom.find(r => r.id === id);
+const hash = str => { let h = 5381; for (const c of str) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return h.toString(36); };
+const rid = title => 'a' + hash(title.toLowerCase());
+const sig = () => { const p = P(); return [p.allergens.slice().sort().join(','), p.diet, p.avoid.join(',')].join('/'); };
+const capObj = (o, n) => { const k = Object.keys(o); k.slice(0, Math.max(0, k.length - n)).forEach(x => delete o[x]); };
 
 /* ---------- ingredient parsing & units ---------- */
 const VULGAR = { '¼': '1/4', '½': '1/2', '¾': '3/4', '⅓': '1/3', '⅔': '2/3', '⅛': '1/8', '⅜': '3/8' };
@@ -226,20 +229,17 @@ function analyze(r) {
   });
   return { items, status };
 }
-const statusOf = r => profileActive() ? analyze(r).status : 'safe';
-const STATUS_TEXT = { safe: 'Safe for you', swap: 'Swap needed', unsafe: 'Contains allergen' };
+const statusOf = r => !r.ingredients ? 'pending' : profileActive() ? analyze(r).status : 'safe';
+const STATUS_TEXT = { safe: 'Safe for you', swap: 'Swap needed', unsafe: 'Contains allergen', pending: 'Writing…' };
 
 /* ---------- rendering: sidebar ---------- */
 const root = { side: $('#side'), list: $('#list'), detail: $('#detail'), app: $('#app') };
 function setPane(p) { root.app.dataset.pane = p; }
 
 function renderSide() {
-  const recipes = allRecipes(), counts = {};
-  recipes.forEach(r => counts[r.cat] = (counts[r.cat] || 0) + 1);
   const p = P(), n = p.allergens.length + p.avoid.length + (p.diet !== 'none' ? 1 : 0);
   const tile = (id, name, emoji, h, cls = '', count = null) =>
     `<button class="tile ${cls} ${S.ui.cat === id ? 'on' : ''}" style="--h:${h}" data-act="cat" data-id="${id}"><span class="em">${emoji}</span>${count != null ? `<span class="ct">${count}</span>` : ''}<span class="lb">${esc(name)}</span></button>`;
-  const safeCount = profileActive() ? recipes.filter(r => statusOf(r) !== 'unsafe').length : recipes.length;
   root.side.innerHTML = `
     <div class="brand"><div class="logo">C</div><b>Cookify</b>
       <button class="ibtn" data-act="profile" title="Allergy & diet profile" aria-label="Allergy and diet profile">${ic('shield')}${n ? `<span class="dot">${n}</span>` : ''}</button>
@@ -248,63 +248,152 @@ function renderSide() {
       <button class="ibtn primary" data-act="new" title="Add recipe" aria-label="Add recipe">${ic('plus')}</button>
     </div>
     <div class="tiles">
-      ${tile('all', 'All recipes', '🍽️', 100, 'special', recipes.length)}
-      ${tile('fav', 'Saved', '⭐', 48, 'fav', S.fav.filter(id => byId(id)).length)}
-      ${profileActive() ? tile('safe', 'Safe for me', '🛡️', 150, 'safe', safeCount) : ''}
-      ${CATS.map(c => tile(c.id, c.name, c.emoji, c.h, '', counts[c.id] || 0)).join('')}
+      ${tile('search', 'AI search', '✨', 100, 'special')}
+      ${tile('mine', 'My recipes', '📖', 48, 'fav', myRecipes().length)}
+      ${CATS.map(c => tile(c.id, c.name, c.emoji, c.h)).join('')}
     </div>
     <p style="color:var(--muted);font-size:12px;margin:16px 4px 4px">Allergen checks read ingredient names only. Always check packaged-food labels.</p>`;
 }
 
 /* ---------- rendering: list ---------- */
+const SUGGESTIONS = ['Quick weeknight dinners', 'High-protein breakfast', 'Kid-friendly snacks', 'Chicken thigh recipes', 'Chocolate chip cookies', 'One-pot pasta'];
 function visibleRecipes() {
-  const u = S.ui, prof = P();
-  const tokens = u.q.toLowerCase().split(/\s+/).filter(Boolean);
-  let rs = allRecipes();
-  if (u.cat === 'fav') rs = rs.filter(r => S.fav.includes(r.id));
-  else if (u.cat !== 'all' && u.cat !== 'safe') rs = rs.filter(r => r.cat === u.cat);
+  const u = S.ui, prof = P(), mine = u.cat === 'mine';
+  let rs = mine ? myRecipes() : S.search.ids.map(id => S.results[id]).filter(Boolean);
+  const tokens = mine ? u.q.toLowerCase().split(/\s+/).filter(Boolean) : [];
   if (tokens.length) rs = rs.filter(r => {
-    const hay = (r.title + ' ' + r.ingredients.join(' ') + ' ' + (catById(r.cat)?.name || '')).toLowerCase();
+    const hay = (r.title + ' ' + (r.ingredients || []).join(' ')).toLowerCase();
     return tokens.every(t => hay.includes(t));
   });
   if (u.quick) rs = rs.filter(r => r.time && r.time <= 30);
   const st = new Map(rs.map(r => [r.id, statusOf(r)]));
   let hidden = 0;
-  if (u.cat === 'safe' || u.safeOnly || prof.hideUnsafe) {
+  if (u.safeOnly || prof.hideUnsafe) {
     const before = rs.length;
-    rs = rs.filter(r => (u.cat === 'safe' || u.safeOnly) ? st.get(r.id) !== 'unsafe' : st.get(r.id) !== 'unsafe');
+    rs = rs.filter(r => st.get(r.id) !== 'unsafe');
     hidden = before - rs.length;
   }
-  rs.sort(u.sort === 'time' ? (a, b) => (a.time || 999) - (b.time || 999) : (a, b) => a.title.localeCompare(b.title));
+  if (u.sort === 'time') rs = [...rs].sort((a, b) => (a.time || 999) - (b.time || 999));
+  else if (u.sort === 'title') rs = [...rs].sort((a, b) => a.title.localeCompare(b.title));
   return { rs, st, hidden };
 }
 function thumb(r, cls = 'thumb') {
   const h = catById(r.cat)?.h ?? 100;
   return `<span class="${cls}" style="--h:${h};${r.image ? `background-image:url('${esc(r.image)}')` : ''}">${r.image ? '' : esc(r.emoji || catById(r.cat)?.emoji || '🍽️')}</span>`;
 }
+const SORT_LABEL = { relevance: 'Best match', time: 'Quickest', title: 'A–Z' };
 function renderList() {
-  const u = S.ui, { rs, st, hidden } = visibleRecipes();
-  const title = u.cat === 'all' ? 'All recipes' : u.cat === 'fav' ? 'Saved' : u.cat === 'safe' ? 'Safe for me' : catById(u.cat)?.name || '';
+  const u = S.ui, { rs, st, hidden } = visibleRecipes(), se = S.search, mine = u.cat === 'mine';
   const active = profileActive();
+  const title = mine ? 'My recipes' : (se.query ? se.query : 'Find recipes');
   const focus = document.activeElement && document.activeElement.id === 'q';
+  const loading = !mine && se.status === 'loading';
+  const sub = mine ? `${rs.length} saved` : loading ? 'Searching…' : se.status === 'done' ? `${rs.length} recipe${rs.length === 1 ? '' : 's'}` : 'AI-powered';
+  let body = '';
+  if (loading) body = [0, 1, 2, 3].map(() => '<div class="row skel"><span class="thumb"></span><span class="t"><b></b><small></small></span></div>').join('');
+  else if (!mine && se.status === 'error') body = `<div class="empty"><div class="big">😕</div><p>${esc(se.error || 'Something went wrong.')}</p><button class="gbtn" data-act="retry">Try again</button></div>`;
+  else if (!mine && se.status === 'idle') body = `<div class="empty"><div class="big">✨</div><p>Ask for anything. A specific dish gets one recipe; a broad craving gets up to ten.</p><div class="chips" style="justify-content:center">${SUGGESTIONS.map(x => `<button class="chip" data-act="suggest" data-q="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`;
+  else body = rs.map(r => {
+    const s2 = st.get(r.id), showBadge = s2 === 'pending' || active;
+    const badge = r.error ? '<span class="badge unsafe">Retry</span>' : `<span class="badge ${s2}">${STATUS_TEXT[s2]}</span>`;
+    return `<button class="row ${S.ui.sel === r.id ? 'on' : ''}" data-act="open" data-id="${esc(r.id)}">${thumb(r)}
+      <span class="t"><b>${esc(r.title)}</b><small>${esc(fmtTime(r.time))}${r.time && (r.blurb || r.source) ? ' · ' : ''}${esc(r.blurb || r.source || '')}</small></span>
+      ${showBadge ? badge : ''}</button>`;
+  }).join('') + (rs.length ? '' : `<div class="empty"><div class="big">🍽️</div><p>${mine ? (u.q ? 'Nothing matches that.' : 'Recipes you save or add appear here.') : 'Nothing to show with these filters.'}</p>${mine ? `<button class="gbtn" data-act="new">${ic('plus')} Add a recipe</button>` : ''}</div>`);
   root.list.innerHTML = `
     <div class="lhead"><button class="tbtn back" data-act="toside" aria-label="Back">${ic('back')}</button>
-      <div class="grow"><h2>${esc(title)}</h2><small>${rs.length} recipe${rs.length === 1 ? '' : 's'}</small></div>
-      <button class="tbtn" data-act="sort" title="Sort: ${u.sort === 'title' ? 'A–Z' : 'quickest'}" aria-label="Change sort order">${ic('sort')}</button></div>
-    <label class="search">${ic('search')}<input id="q" type="search" placeholder="Search recipes or ingredients" value="${esc(u.q)}" autocomplete="off"></label>
+      <div class="grow"><h2 class="clamp1">${esc(title)}</h2><small>${sub}</small></div>
+      <button class="tbtn" data-act="sort" title="Sort: ${SORT_LABEL[u.sort]}" aria-label="Change sort order">${ic('sort')}</button></div>
+    <form id="qform" class="searchform"><label class="search">${ic('search')}<input id="q" type="search" placeholder="${mine ? 'Filter my recipes' : 'Ask for anything: “spicy vegan dinner”'}" value="${esc(u.q)}" autocomplete="off" enterkeyhint="search"></label>${mine ? '' : '<button class="gbtn" type="submit">Search</button>'}</form>
+    ${!mine && se.status === 'done' && se.intro ? `<p class="intro">${esc(se.intro)}</p>` : ''}
     <div class="chips">
       ${active ? `<button class="chip" data-act="safeonly" aria-pressed="${u.safeOnly}">${ic('shield')} Safe only</button>` : ''}
       <button class="chip" data-act="quick" aria-pressed="${u.quick}">${ic('clock')} Under 30 min</button>
-      <span class="chip" style="border:0;background:none;color:var(--muted)">Sorted ${u.sort === 'title' ? 'A–Z' : 'by time'}</span>
+      <span class="chip" style="border:0;background:none;color:var(--muted)">${SORT_LABEL[u.sort]}</span>
     </div>
-    ${hidden && !u.safeOnly && u.cat !== 'safe' ? `<div class="banner">${ic('shield')}<span>${hidden} recipe${hidden > 1 ? 's' : ''} hidden by your profile.</span><button data-act="showhidden">Show</button></div>` : ''}
-    <div class="rows">${rs.map(r => `
-      <button class="row ${S.ui.sel === r.id ? 'on' : ''}" data-act="open" data-id="${esc(r.id)}">${thumb(r)}
-        <span class="t"><b>${esc(r.title)}</b><small>${esc(fmtTime(r.time))}${r.time && r.source ? ' · ' : ''}${esc(r.source || '')}</small></span>
-        ${active ? `<span class="badge ${st.get(r.id)}">${STATUS_TEXT[st.get(r.id)]}</span>` : ''}</button>`).join('')}</div>
-    ${rs.length ? '' : `<div class="empty"><div class="big">🍽️</div><p>${u.q ? 'Nothing matches that search.' : 'No recipes here yet.'}</p><button class="gbtn" data-act="new">${ic('plus')} Add a recipe</button></div>`}`;
+    ${hidden && !u.safeOnly ? `<div class="banner">${ic('shield')}<span>${hidden} recipe${hidden > 1 ? 's' : ''} hidden by your profile.</span><button data-act="showhidden">Show</button></div>` : ''}
+    <div class="rows">${body}</div>
+    ${!mine && rs.length && !loading ? `<button class="obtn wide" data-act="addall">${ic('cart')} Add all ${rs.length} to shopping list</button>` : ''}`;
   if (focus) { const q = $('#q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
 }
+
+/* ---------- AI search ---------- */
+const profilePayload = () => { const p = P(); return { allergens: p.allergens.map(id => A[id].label), diet: p.diet, avoid: p.avoid }; };
+async function postJSON(url, body) {
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  let d = {};
+  try { d = await res.json(); } catch { /* non-JSON error */ }
+  if (!res.ok) throw new Error(d.error || 'Something went wrong. Try again.');
+  return d;
+}
+function saveSearch() {
+  const keep = {};
+  S.search.ids.forEach(id => { if (S.results[id]) keep[id] = S.results[id]; });
+  S.results = keep;
+  store.set('search', S.search.status === 'done' ? S.search : { key: '', query: '', intro: '', ids: [], status: 'idle' });
+  persist('results', 'saved', 'details');
+}
+const Q = { active: 0, waiting: [], pending: new Map() };
+function pump() {
+  while (Q.active < 4 && Q.waiting.length) {
+    const { r, resolve } = Q.waiting.shift();
+    Q.active++;
+    loadDetail(r).finally(() => { Q.active--; Q.pending.delete(r.id); resolve(r); pump(); });
+  }
+}
+function fetchDetail(r, priority = false) {
+  if (r.ingredients) return Promise.resolve(r);
+  const cached = S.details[r.id + '|' + sig()];
+  if (cached) { r.ingredients = cached.ingredients; r.steps = cached.steps; return Promise.resolve(r); }
+  if (Q.pending.has(r.id)) {
+    if (priority) { const i = Q.waiting.findIndex(w => w.r.id === r.id); if (i > 0) Q.waiting.unshift(Q.waiting.splice(i, 1)[0]); }
+    return Q.pending.get(r.id);
+  }
+  const p = new Promise(resolve => { Q.waiting[priority ? 'unshift' : 'push']({ r, resolve }); });
+  Q.pending.set(r.id, p); pump();
+  return p;
+}
+async function loadDetail(r) {
+  r.error = null;
+  try {
+    const d = await postJSON('/api/recipe', { title: r.title, blurb: r.blurb, serves: r.serves, profile: profilePayload() });
+    r.ingredients = d.ingredients; r.steps = d.steps;
+    S.details[r.id + '|' + sig()] = { ingredients: d.ingredients, steps: d.steps }; capObj(S.details, 60);
+  } catch (e) { r.error = e.message; }
+  if (S.results[r.id] === r) saveSearch();
+  renderList(); if (S.ui.sel === r.id) renderDetail();
+}
+let searchSeq = 0;
+async function runSearch(query, opts = {}) {
+  query = String(query || '').trim();
+  if (query.length < 2) { toast('Type what you feel like cooking'); return; }
+  const key = query.toLowerCase() + '|' + sig(), seq = ++searchSeq;
+  S.ui.cat = opts.cat || 'search'; S.ui.q = query; S.ui.sel = null; S.ui.swapOpen = null;
+  const hit = S.cache[key];
+  if (hit && !opts.force) {
+    S.results = {}; hit.recs.forEach(r => { S.results[r.id] = { ...r }; });
+    S.search = { key, query, intro: hit.intro, ids: hit.recs.map(r => r.id), status: 'done' };
+  } else {
+    S.search = { key, query, intro: '', ids: [], status: 'loading' };
+    renderAll(); setPane('list');
+    try {
+      const d = await postJSON('/api/search', { query, profile: profilePayload() });
+      if (seq !== searchSeq) return;
+      S.results = {}; const ids = [];
+      d.recipes.forEach(r => { const id = rid(r.title); if (!S.results[id]) { S.results[id] = { ...r, id, ai: true }; ids.push(id); } });
+      S.search = { key, query, intro: d.intro, ids, status: 'done' };
+      S.cache[key] = { intro: d.intro, recs: ids.map(id => S.results[id]) }; capObj(S.cache, 25); persist('cache');
+    } catch (e) {
+      if (seq !== searchSeq) return;
+      S.search = { key, query, intro: '', ids: [], status: 'error', error: e.message };
+      renderAll(); return;
+    }
+  }
+  saveSearch(); renderAll(); setPane('list'); root.list.scrollTop = 0;
+  S.search.ids.forEach(id => fetchDetail(S.results[id]));
+  renderList();
+}
+function ensureSaved(r) { if (r.ai && !S.saved[r.id]) { S.saved[r.id] = { ...r }; persist('saved'); renderSide(); } }
 
 /* ---------- rendering: detail ---------- */
 function renderDetail() {
@@ -317,13 +406,21 @@ function renderDetail() {
   }
   const scroll = root.detail.scrollTop;
   const cat = catById(r.cat), h = cat?.h ?? 100;
+  if (!r.ingredients) {
+    root.detail.innerHTML = `<div class="dwrap"><div class="dtop"><button class="tbtn back" data-act="tolist" aria-label="Back">${ic('back')}</button><span class="pill">${esc(cat?.name || 'Recipe')}</span></div>
+      <div class="hero" style="--h:${h}"><span class="em">${esc(r.emoji || '🍽️')}</span></div>
+      <div class="dbody"><h1>${esc(r.title)}</h1><p style="color:var(--muted)">${esc(r.blurb || '')}</p>
+      ${r.error ? `<div class="safebox unsafe">${ic('alert')}<div>${esc(r.error)} <button data-act="retrydetail" data-id="${esc(r.id)}">Try again</button></div></div>`
+        : `<div class="writing"><span class="spin"></span> Writing your recipe${profileActive() ? ' with your allergy profile…' : '…'}</div>`}</div></div>`;
+    return;
+  }
   const serves = S.servings[r.id] || r.serves || 4, factor = serves / (r.serves || serves);
   const { items, status } = analyze(r), active = profileActive();
   const tags = [...new Set(items.flatMap(it => tagsOf(it.ing.n)))];
   const hitSet = bannedSet();
   const checked = S.checked[r.id] || {};
   const bad = items.filter(it => it.hits.length);
-  const isFav = S.fav.includes(r.id);
+  const isFav = !!S.saved[r.id];
   let safeHtml = '';
   if (!active) safeHtml = `<div class="safebox none">${ic('shield')}<div>Tell Cookify about your allergies and diet to check this recipe. <button data-act="profile">Set up profile</button></div></div>`;
   else if (status === 'safe') safeHtml = `<div class="safebox safe">${ic('check')}<div><b>Safe for your profile.</b> No ingredients match your allergens or diet.</div></div>`;
@@ -338,7 +435,7 @@ function renderDetail() {
       <button class="tbtn" data-act="copy" title="Copy ingredients" aria-label="Copy ingredients">${ic('copy')}</button>
       <button class="gbtn" data-act="edit">${ic('edit')} Edit</button></div>
     <div class="hero" style="--h:${h};${r.image ? `background-image:url('${esc(r.image)}')` : ''}">${r.image ? '' : `<span class="em">${esc(r.emoji || cat?.emoji || '🍽️')}</span>`}
-      <button class="star ${isFav ? 'on' : ''}" data-act="fav" aria-label="${isFav ? 'Remove from saved' : 'Save recipe'}" aria-pressed="${isFav}">${ic('star')}</button></div>
+      ${r.ai ? `<button class="star ${isFav ? 'on' : ''}" data-act="fav" aria-label="${isFav ? 'Remove from saved' : 'Save recipe'}" aria-pressed="${isFav}">${ic('star')}</button>` : ''}</div>
     <div class="dbody">
       <h1>${esc(r.title)}</h1>
       <div class="meta">
@@ -435,7 +532,7 @@ function planPickModal() {
 
 function formModal(r) {
   const editing = !!r;
-  const v = r || { title: '', cat: S.ui.cat && catById(S.ui.cat) ? S.ui.cat : CATS[0].id, emoji: '', time: '', serves: 4, source: '', image: '', ingredients: [], steps: [] };
+  const v = r || { title: '', cat: catById(S.ui.cat) ? S.ui.cat : CATS[0].id, emoji: '', time: '', serves: 4, source: '', image: '', ingredients: [], steps: [] };
   return sheet(editing ? 'Edit recipe' : 'Add a recipe', `
     ${editing ? '' : `<div class="field"><label>Import from a web page</label><div class="inline"><input id="impUrl" type="url" placeholder="https://… any recipe page"><button class="obtn" data-act="import">Import</button></div><div class="err" id="impErr"></div></div>`}
     <form id="rform" autocomplete="off">
@@ -522,14 +619,28 @@ function addToList(r, mult = 1) {
 
 /* ---------- actions ---------- */
 const ACT = {
-  cat(t) { S.ui.cat = t.dataset.id; S.ui.q = ''; renderSide(); renderList(); setPane('list'); root.list.scrollTop = 0; },
+  cat(t) {
+    const id = t.dataset.id;
+    if (id === 'mine') { S.ui.cat = 'mine'; S.ui.q = ''; S.ui.sel = null; S.ui.sort = 'title'; renderAll(); setPane('list'); return; }
+    if (id === 'search') { S.ui.cat = 'search'; S.ui.sort = 'relevance'; renderAll(); setPane('list'); $('#q')?.focus(); return; }
+    S.ui.sort = 'relevance'; runSearch(`${catById(id).name} recipes`, { cat: id });
+  },
+  suggest(t) { S.ui.sort = 'relevance'; runSearch(t.dataset.q); },
+  retry() { runSearch(S.search.query, { force: true }); },
+  retrydetail(t) { const r = byId(t.dataset.id); if (r) { r.error = null; fetchDetail(r, true); renderDetail(); } },
+  async addall() {
+    const rs = visibleRecipes().rs; toast('Building your shopping list…');
+    await Promise.all(rs.map(r => fetchDetail(r, true)));
+    let n = 0; rs.forEach(r => { if (r.ingredients) { addToList(r); n++; } });
+    toast(n ? `Added ${n} recipe${n > 1 ? 's' : ''} to your list` : 'Recipes are still loading'); if (n) showModal(shopModal);
+  },
   open(t) { closeModalQuiet(); openRecipe(t.dataset.id); },
   toside() { setPane('cats'); }, tolist() { setPane('list'); },
-  sort() { S.ui.sort = S.ui.sort === 'title' ? 'time' : 'title'; renderList(); },
+  sort() { S.ui.sort = { relevance: 'time', time: 'title', title: 'relevance' }[S.ui.sort]; renderList(); },
   quick() { S.ui.quick = !S.ui.quick; renderList(); },
   safeonly() { S.ui.safeOnly = !S.ui.safeOnly; renderList(); },
   showhidden() { S.profile = { ...P(), hideUnsafe: false }; persist('profile'); renderAll(); },
-  fav() { const id = S.ui.sel; S.fav = S.fav.includes(id) ? S.fav.filter(x => x !== id) : [...S.fav, id]; persist('fav'); renderDetail(); renderSide(); if (S.ui.cat === 'fav') renderList(); },
+  fav() { const r = byId(S.ui.sel); if (!r || !r.ingredients) return; if (S.saved[r.id]) delete S.saved[r.id]; else S.saved[r.id] = { ...r }; persist('saved'); renderDetail(); renderSide(); if (S.ui.cat === 'mine') renderList(); },
   serv(t) { const r = byId(S.ui.sel); S.servings[r.id] = Math.max(1, (S.servings[r.id] || r.serves || 4) + +t.dataset.d); renderDetail(); },
   units() { S.units = S.units === 'us' ? 'metric' : 'us'; persist('units'); renderDetail(); },
   chk(t) { const id = S.ui.sel; (S.checked[id] ||= {})[t.dataset.i] = t.checked; },
@@ -554,7 +665,7 @@ const ACT = {
     try { await navigator.clipboard.writeText(r.title + '\n\n' + analyze(r).items.map(i => '• ' + fmtIng(i.ing, f)).join('\n')); toast('Ingredients copied'); } catch { toast('Copy failed'); }
   },
   addlist() { const r = byId(S.ui.sel); addToList(r); toast('Added to shopping list'); },
-  addplan() { planTarget = S.ui.sel; showModal(planPickModal); },
+  addplan() { ensureSaved(byId(S.ui.sel)); planTarget = S.ui.sel; showModal(planPickModal); },
   planpick(t) { const d = t.dataset.d; (S.plan[d] ||= []).push(planTarget); persist('plan'); toast(`Planned for ${d}`); closeModal(); },
   planrm(t) { S.plan[t.dataset.d].splice(+t.dataset.i, 1); persist('plan'); refreshModal(); },
   planclear() { S.plan = {}; persist('plan'); refreshModal(); },
@@ -594,18 +705,18 @@ const ACT = {
     const lines = s => s.split('\n').map(x => x.replace(/^\s*(\d+[.)]|[-•*])\s*/, '').trim()).filter(Boolean);
     const rec = { id: editingId || 'c' + Date.now().toString(36), title: f.title.value.trim(), cat: f.cat.value, emoji: f.emoji.value.trim(), time: +f.time.value || 0,
       serves: +f.serves.value || 4, source: f.source.value.trim(), image: f.image.value.trim(), ingredients: lines(f.ingredients.value), steps: lines(f.steps.value) };
-    if (editingId) {
-      const ci = S.custom.findIndex(r => r.id === editingId);
-      if (ci > -1) S.custom[ci] = rec; else S.edits[editingId] = rec;
-      delete S.swaps[editingId]; persist('swaps');
-    } else S.custom.push(rec);
-    persist('custom', 'edits'); closeModal(); S.ui.cat = 'all'; S.ui.q = ''; renderAll(); openRecipe(rec.id); toast('Recipe saved');
+    const orig = editingId && byId(editingId);
+    if (orig && orig.ai) { rec.id = 'c' + Date.now().toString(36); delete S.saved[orig.id]; S.custom.push(rec); persist('saved'); }
+    else if (editingId) { const ci = S.custom.findIndex(r => r.id === editingId); if (ci > -1) S.custom[ci] = rec; delete S.swaps[editingId]; persist('swaps'); }
+    else S.custom.push(rec);
+    persist('custom'); closeModal(); S.ui.cat = 'mine'; S.ui.q = ''; S.ui.sort = 'title'; renderAll(); openRecipe(rec.id); toast('Recipe saved');
   },
   delete() {
     if (!confirm('Delete this recipe?')) return;
     const id = editingId, ci = S.custom.findIndex(r => r.id === id);
-    if (ci > -1) S.custom.splice(ci, 1); else { S.hidden.push(id); delete S.edits[id]; }
-    S.fav = S.fav.filter(x => x !== id); persist('custom', 'edits', 'hidden', 'fav');
+    if (ci > -1) S.custom.splice(ci, 1);
+    delete S.saved[id]; delete S.results[id]; S.search.ids = S.search.ids.filter(x => x !== id);
+    persist('custom', 'saved'); saveSearch();
     closeModal(); S.ui.sel = null; renderAll(); setPane('list'); toast('Recipe deleted');
   },
   close() { closeModal(); },
@@ -615,7 +726,7 @@ function closeModalQuiet() { if (modalFn) closeModal(); }
 function openRecipe(id) {
   S.ui.sel = id; S.ui.swapOpen = null;
   const r = byId(id);
-  if (r && S.ui.cat !== 'all' && S.ui.cat !== 'fav' && S.ui.cat !== 'safe' && r.cat !== S.ui.cat) S.ui.cat = r.cat;
+  if (r && !r.ingredients) fetchDetail(r, true);
   renderSide(); renderList(); renderDetail(); setPane('detail'); root.detail.scrollTop = 0;
   history.replaceState(null, '', '#r=' + encodeURIComponent(id));
 }
@@ -626,8 +737,11 @@ document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t) return;
   const fn = ACT[t.dataset.act]; if (fn) fn(t, e);
 });
+document.addEventListener('submit', e => {
+  if (e.target.id === 'qform') { e.preventDefault(); if (S.ui.cat === 'mine') return; S.ui.sort = 'relevance'; runSearch($('#q').value); }
+});
 document.addEventListener('input', e => {
-  if (e.target.id === 'q') { S.ui.q = e.target.value; renderList(); }
+  if (e.target.id === 'q') { S.ui.q = e.target.value; if (S.ui.cat === 'mine') renderList(); }
   else if (e.target.dataset && e.target.dataset.notes) { S.notes[e.target.dataset.notes] = e.target.value; persist('notes'); }
 });
 document.addEventListener('keydown', e => {
@@ -643,6 +757,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && COOK.id) wakeOn(); });
 
 /* ---------- boot ---------- */
+if (S.search.status === 'done' && S.search.ids.length) { S.search.ids.forEach(id => { if (S.results[id] && !S.results[id].ingredients) fetchDetail(S.results[id]); }); } else S.search.status = 'idle';
 renderAll();
 const m = location.hash.match(/#r=(.+)/);
 if (m && byId(decodeURIComponent(m[1]))) openRecipe(decodeURIComponent(m[1]));
