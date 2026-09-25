@@ -156,6 +156,7 @@ function hitsFor(text) {
   for (const w of P().avoid) if (w && low.includes(w.toLowerCase())) hits.push('avoid:' + w);
   return hits;
 }
+const LABEL = /chocolate|broth|stock|sausage|bacon|sauce|salsa|dressing|chips|bouillon|seasoning|curry powder|pesto|mustard|vinegar|baking powder/i;
 const profileActive = () => { const p = P(); return p.allergens.length || p.avoid.length || p.diet !== 'none'; };
 
 const SUBS = [
@@ -354,7 +355,7 @@ function renderDetail() {
       <ul class="ings">${items.map(it => {
         const hit = it.hits.length, open = S.ui.swapOpen === it.i;
         const txt = fmtIng(it.ing, factor);
-        return `<li class="ing ${hit ? 'flag' : ''}"><label><input type="checkbox" data-act="chk" data-i="${it.i}" ${checked[it.i] ? 'checked' : ''}><span class="txt">${hit ? `<b>${esc(txt)}</b>` : esc(txt)}</span></label>
+        return `<li class="ing ${hit ? 'flag' : ''}"><label><input type="checkbox" data-act="chk" data-i="${it.i}" ${checked[it.i] ? 'checked' : ''}><span class="txt">${hit ? `<b>${esc(txt)}</b>` : esc(txt)}${!hit && active && LABEL.test(it.ing.n) ? ' <span class="tag" title="Packaged versions can contain hidden allergens">Check label</span>' : ''}</span></label>
           ${it.swapped ? `<div class="swapped">Swapped from <s>${esc(it.orig.n)}</s> · <button data-act="undo" data-i="${it.i}">Undo</button></div>` : ''}
           ${hit ? `<div class="warn">${ic('alert')} Conflicts with: ${it.hits.map(x => esc(label(x))).join(', ')}
             ${it.subs.length ? `<button data-act="swapopen" data-i="${it.i}">${open ? 'Hide swaps' : `Find a swap (${it.subs.length})`}</button>` : '<b>No safe swap found</b>'}</div>` : ''}
