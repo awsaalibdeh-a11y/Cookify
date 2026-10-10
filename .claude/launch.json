@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mise",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["C:/Edits/mise/app.py"],
+      "cwd": "C:/Edits/mise",
+      "port": 5060
+    }
+  ]
+}

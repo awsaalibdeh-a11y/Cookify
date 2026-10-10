@@ -23,6 +23,8 @@ urllib3_connection.allowed_gai_family = lambda: socket.AF_INET
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
+import hubguard  # noqa: E402  (the owner's universal switches, kept in Cramly)
+hubguard.install(app, "cookify")
 
 with open(os.path.join(BASE, "recipes.json"), encoding="utf-8") as fh:
     SEED = json.load(fh)
